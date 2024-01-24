@@ -33,6 +33,9 @@ def home():
     return render_template("index.html")
 
 
+# HTTP GET - Read Record
+
+
 @app.route("/random", methods=['GET'])
 def get_random_cafe():
     cafes = db.session.query(Cafe).all()
@@ -69,5 +72,24 @@ def get_cafe_at_location():
         return jsonify(error={'Not Found': "Sorry, no cafe at that location"})
 
 
-if __name__ == '__main__':
-    app.run(debug=True)
+# HTTP POST - Create Record
+@app.route('/add', methods=['POST'])
+def add_cafe():
+    try:
+        new_cafe = Cafe(
+            name=request.form.get("name"),
+            map_url=request.form.get("map_url"),
+            img_url=request.form.get("img_url"),
+            location=request.form.get("loc"),
+            has_sockets=bool(request.form.get("sockets")),
+            has_toilet=bool(request.form.get("toilet")),
+            has_wifi=bool(request.form.get("wifi")),
+            can_take_calls=bool(request.form.get("calls")),
+            seats=request.form.get("seats"),
+            coffee_price=request.form.get("coffee_price"),
+        )
+        db.session.add(new_cafe)
+        db.session.commit()
+        return jsonify(response={"success": "Successfully added the new cafe"})
+    except Exception as e:
+        return jsonify(error={"message": f"Failed to add the new cafe. {str(e)}"})
